@@ -41,11 +41,20 @@ div {
  * content 
  */
 .content {
-  /*width: 200px;*/
+  padding: 4px 4px 4px 1em;
 }
-.content-ok {
-  /*width: 200px;*/
-  text-align: right;
+div.container {
+  width: 100%;
+  font-size: 1.25em;
+  user-select: none;
+}
+div.button {
+  padding: 4px 4px 4px 1em;
+  cursor: pointer;
+}
+
+div.button:hover {
+  background-color: pink;
 }
 .content-input {
   float: left;

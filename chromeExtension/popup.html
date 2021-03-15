@@ -2,6 +2,7 @@
 <html lang="ja">
 <head><meta charset="utf-8">
 <script src="./jquery-1.10.2.min.js"></script>
+<script src="browser-polyfill.min.js" type="application/javascript"></script>
 <script src="./popup.js"></script>
 <link href="./popup.css" rel="stylesheet" type="text/css">
 </head>
@@ -11,7 +12,7 @@
   <!-- header -->
   <div class="header">
     <div class="header-left">
-      <span>Sample Extension</span>
+      <span>Mascot Extension</span>
     </div>
     <div class="header-right">
       <span class="plus">＋</span>
@@ -20,9 +21,18 @@
   </div>
 
   <!-- content -->
-  <div class="content">
-    <div class="content-ok"><span>OK</span></div>
-  </div>
+  
+      <div class="container" id="successPage">
+          <div class="content button" id="add">Add mascot to tab</div>
+          <div class="content button" id="remove">Remove mascot from tab</div>
+          <div class="content button" id="clear">Clear mascot in this tab</div>
+      </div>
+      <div class="container" id="errorPage">
+        <div class="content">
+          Mascot can not be summoned.
+        </div>
+      </div>
+
 
   <!-- footer -->
   <div class="footer">
