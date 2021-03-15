@@ -15,7 +15,7 @@
                       sendMessage(message, retries+1);
                   }, 400);
               } else {
-                  window.browser.tabs.sendMessage(
+                  window.browser.tabs.sendMessage(///*送信先のタブid*/, /*送るモノ*/, function(/*レスポンス*/)
                       tab.id, message).catch((e) => { showErrorPage(); });
               }
           }
@@ -47,7 +47,6 @@
     })
   }
   function initPopup() {
-    console.log('JavaScriptのアラート');
     document.getElementById("errorPage").style.display = "none";
     document.getElementById("successPage").style.display = "block";
     document.getElementById("add").addEventListener(
