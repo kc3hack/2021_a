@@ -57,8 +57,8 @@
       "click", () => sendMessage("clear", 0));
   }
   //ここから実行される
-  var pageWorks = false;
-  pageWorks = testPage().then(pageWorks => {
+  
+  testPage().then(pageWorks => {
     if (pageWorks) {
       
       if (document.readyState === "complete") {
