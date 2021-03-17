@@ -284,7 +284,38 @@ class MascotManager {
     }
   }
 }
+
+class MascotAction {
+  // listening(){
+  // }
+  // reply(){
+  // }
+  communicate(){
+    var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+    var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+    var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+
+    var recognition = new SpeechRecognition();
+    var speechRecognitionList = new SpeechGrammarList();
+
+    recognition.grammars = speechRecognitionList;
+    recognition.continuous = false;
+    recognition.lang = 'ja-JP'
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+
+    var canvas = document.getElementById("mascotDivElement");
+
+    recognition.onresult = (event) => {
+      console.log(event.results[0][0].transcript);
+    }
+  }
+}
+
 var mascotManager = new MascotManager(chrome, 500, 30);
+var mascotAction = new MascotAction();
 var manager = null;
 function main(chrome) {
   chrome.runtime.onMessage.addListener(function (message) {
@@ -309,7 +340,11 @@ function main(chrome) {
       case "clear":
         if (manager != null)
           //manager.clearKitties();
-          break;
+        break;
+      case "talk":
+        if (manager != null)
+          mascotAction.communicate();
+        break;
     }
     return false;
   });

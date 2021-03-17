@@ -55,6 +55,8 @@
       "click", () => sendMessage("remove", 0));
     document.getElementById("clear").addEventListener(
       "click", () => sendMessage("clear", 0));
+    document.getElementById("talk").addEventListener(
+      "click", () => sendMessage("talk", 0));
   }
   //ここから実行される
   
