@@ -74,16 +74,32 @@ async function questionAnswering(sentence) {
 
 
 /**
- * どの条件にも当てはまらなかった場合の返答
+ * どの条件にも当てはまらなかった場合はtalk APIで返答
  * @param {string} sentence 質問文
  * @return {string} 回答
  */
 async function nothingQuestionAnswering(sentence) {
+    const TALK_API_KEY = 'DZZ7cgxh9PkFzxoMvm2l4T0wgadwVd6d';
     let answer;
     return new Promise((resolve, reject) => {
-        answer = 'すみませんわん。よくわかりませんでしたわん。';
-        console.log( `返答：${answer}`)
-        resolve(answer)
+        let formdata = new FormData();
+        formdata.append('apikey', TALK_API_KEY);
+        formdata.append('query',sentence);
+
+        // リクエスト
+        fetch('https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk',{
+            method: 'post',
+            body: formdata,
+        }).then(response => {
+            // レスポンス取得
+            response.json().then(data => {
+                // 返答取得
+                console.log(data);
+                answer = data.results[0].reply;
+                console.log( `返答：${answer}`)
+                resolve(answer)
+            })
+        })
     });
 }
 
@@ -181,7 +197,7 @@ async function weatherQuestionAnswering(sentence){
                 console.log(result)
                 // 天気を 英語 -> 日本語に変換する
                 const weatherJapanese = weathers[result];
-                answer = `${timeWord}の${regionWord}の天気は${weatherJapanese}だわん。`;
+                answer = `${timeWord}の${regionWord}の天気は${weatherJapanese}です`;
                 console.log( `返答：${answer}`)
 
             })
@@ -192,4 +208,4 @@ async function weatherQuestionAnswering(sentence){
 }
 
 
-questionAnswering('あさっての東京の');
+questionAnswering('ありがとうございます');
