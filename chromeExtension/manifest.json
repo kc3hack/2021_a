@@ -41,7 +41,8 @@
     "scopes": [
       "profile email",
       "https://www.googleapis.com/auth/calendar",
-      "https://www.googleapis.com/auth/calendar.readonly"
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "openid"
     ]
   },
   "content_security_policy": "script-src 'self' https://calendar.google.com; object-src 'self'"
