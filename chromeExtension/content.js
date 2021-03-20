@@ -16,6 +16,13 @@ class DIRECTION {
     this.Left = 1;
   }
 }
+class Animation {
+  constricor(){
+    this.walk=[];
+    this.walk.push();
+  }
+
+}
 var Direction = new DIRECTION();
 var MASCOT_STATES = new MascotStates();
 class Mascot {
@@ -58,6 +65,7 @@ class Mascot {
     this.checkBounds();
     this.draw();
   }
+  
 isBeingGrabbed(){
   return this.state === MASCOT_STATES.Grabbed;
 }
