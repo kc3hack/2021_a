@@ -34,6 +34,7 @@ class Mascot {
     this.canvas = document.createElement("canvas");
     this.canvas.id = 'mascotCanvas';
     this.canvas.style.position = "fixed";
+    this.canvas.width = 500;
     this.canvas.style.top = "0px";
     this.canvas.style.left = "0px";
     this.canvas.style.zIndex = "2147400000";
@@ -58,9 +59,9 @@ class Mascot {
     this.checkBounds();
     this.draw();
   }
-isBeingGrabbed(){
-  return this.state === MASCOT_STATES.Grabbed;
-}
+  isBeingGrabbed(){
+    return this.state === MASCOT_STATES.Grabbed;
+  }
   updateState(fps) {
     if (!this.isBeingGrabbed() &&
       this.y < window.innerHeight - this.mascot_height) {
@@ -125,7 +126,7 @@ isBeingGrabbed(){
     if (context === null) {
       throw new ReferenceError("context is null!");
     }
-    context.clearRect(0, 0, 32, 32);
+
     context.drawImage(this.image, 0, 0, this.mascot_width, this.mascot_height, 0, 0, this.mascot_width, this.mascot_height);
     //this.mascot_img.setAttribute("style", "position:absolute; left:" + this.x + "px; top:" + this.y + "px;");
   }
@@ -254,7 +255,6 @@ class MascotManager {
       return;
     }
 
-
     this.mascot.update(this.fps);
     if (this.mascot.isBeingGrabbed()) {
       if (this.grabbedMascot !== undefined &&
@@ -284,7 +284,103 @@ class MascotManager {
     }
   }
 }
+
+class MascotAction {
+  constructor(){
+    this.mascot = null;
+    this.fontsize = 18;
+  }
+
+  copyMascot(mascot){
+    this.mascot = mascot;
+  }
+
+  //吹き出しと文章描画
+  drawMessage(lineText){
+    this.canvas = document.getElementById("mascotCanvas");
+    var context = this.canvas.getContext("2d");
+    if (context === null) {
+      throw new ReferenceError("context is null!");
+    }
+
+    var border = 1;
+    var padding = 5;
+    var limitedWidth = this.canvas.width - this.mascot.mascot_width - ((border + padding)* 2);
+
+    var newLineTextList = [];
+
+    //文章を改行したものに変換
+    if(context.measureText(lineText).width > limitedWidth) {
+      var charList = lineText.split("");
+      var preLineText = "";
+      var lineText = "";
+      charList.forEach((char) => {
+        lineText += char;
+        if (context.measureText(lineText).width > limitedWidth) {
+          newLineTextList.push(preLineText);
+          lineText = char;
+        }
+        preLineText = lineText;
+      });
+    }
+    newLineTextList.push(lineText);
+
+    //キャンバスをクリア
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    var boxWidth = border * 2 + padding * 2 + this.fontsize * newLineTextList[0].length;
+    var boxHeight = border * 2 + padding * 2 + this.fontsize * newLineTextList.length;
+
+    //テキストボックス描画部分
+    context.fillStyle = "black";
+    context.fillRect(this.mascot.mascot_width, 0, boxWidth, boxHeight);
+    context.fillStyle = "white";
+    context.fillRect(this.mascot.mascot_width + border, border, boxWidth - border * 2, boxHeight - border * 2);
+
+    //テキスト出力
+    context.font = this.fontsize + "px serif";
+    context.fillStyle = "black";
+    newLineTextList.forEach((lineText, index) => {
+      context.fillText(lineText, this.mascot.mascot_width + border + padding, border + (this.fontsize * (index + 1)));
+    });
+  }
+
+  clearText(){
+    this.canvas = document.getElementById("mascotCanvas");
+    var context = this.canvas.getContext("2d");
+    if (context === null) {
+      throw new ReferenceError("context is null!");
+    }
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  listening(){
+    var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+    var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+    var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
+
+    var recognition = new SpeechRecognition();
+    var speechRecognitionList = new SpeechGrammarList();
+
+    recognition.grammars = speechRecognitionList;
+    recognition.continuous = false;
+    recognition.lang = 'ja-JP'
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.start();
+    this.drawMessage("どうしたの？");
+
+    recognition.onresult = (event) => {
+      //event.results[0][0].transcript：音声入力された文章
+      //出力したい文章を引数に入れてください
+      this.drawMessage(event.results[0][0].transcript);
+    }
+  }
+}
+
 var mascotManager = new MascotManager(chrome, 500, 30);
+var mascotAction = new MascotAction();
 var manager = null;
 function main(chrome) {
   chrome.runtime.onMessage.addListener(function (message) {
@@ -298,6 +394,7 @@ function main(chrome) {
             manager.start();
           })
 
+          mascotAction.copyMascot(manager.mascot);
         }
 
         break;
@@ -308,8 +405,14 @@ function main(chrome) {
         break;
       case "clear":
         if (manager != null)
-          //manager.clearKitties();
-          break;
+          mascotAction.clearText();
+        break;
+      case "talk":
+        if (manager != null){
+          mascotAction.copyMascot(manager.mascot);
+          mascotAction.listening();
+        }
+        break;
     }
     return false;
   });
