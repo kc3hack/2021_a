@@ -36,24 +36,35 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         url: create_oauth2_url(),
         interactive: true
       }, function (redirect_url) {
-          console.log(redirect_url);
+        console.log(redirect_url);
 
+        let id_token = redirect_url.substring(redirect_url.indexOf('id_token=') + 9);
+        id_token = id_token.substring(0, id_token.indexOf('&'));
+        const user_info = KJUR.jws.JWS.readSafeJSONString(b64utoutf8(id_token.split(".")[1]));
           
-          sendResponse('success');
+        if ((user_info.iss === 'https://accounts.google.com' || user_signed_in.iss === 'accounts.google.com') && user_info.aud === CLIENT_ID) {
+          chrome.browserAction.setPopup({ popup: './popup.html' }, function () {
+            user_signed_in = true;
+            sendResponse('success');
+          });
+        } else {
+          console.log("Could not Authenticate.");
+        }
+        console.log(user_info);
+        sendResponse('success');
       });
 
       return true;
     }
-  } else if (request.message === 'logout') {
+  } else if (request.message === 'Signout') {
+    chrome.browserAction.setPopup({ popup: './loginpopup.html' }, function () {
+      user_signed_in = false;
+      sendResponse('success');
     
-  } else if (request.message === 'isUserSignedIn') {
-    
+    });
+    return true;
   }
-})
-
-console.log("background.js global");
-var BackGround = ( function() {
-  console.log("background.js ready");
-})();
-
-
+  else if (request.message === 'isUserSignedIn') {
+    sendResponse(is_user_signed_in());
+  }
+});
