@@ -58,9 +58,9 @@ class Mascot {
     this.checkBounds();
     this.draw();
   }
-isBeingGrabbed(){
-  return this.state === MASCOT_STATES.Grabbed;
-}
+  isBeingGrabbed(){
+    return this.state === MASCOT_STATES.Grabbed;
+  }
   updateState(fps) {
     if (!this.isBeingGrabbed() &&
       this.y < window.innerHeight - this.mascot_height) {
@@ -125,7 +125,7 @@ isBeingGrabbed(){
     if (context === null) {
       throw new ReferenceError("context is null!");
     }
-    context.clearRect(0, 0, 32, 32);
+    // context.clearRect(0, 0, 32, 32); //おそらく機能に関係しない
     context.drawImage(this.image, 0, 0, this.mascot_width, this.mascot_height, 0, 0, this.mascot_width, this.mascot_height);
     //this.mascot_img.setAttribute("style", "position:absolute; left:" + this.x + "px; top:" + this.y + "px;");
   }
@@ -254,7 +254,6 @@ class MascotManager {
       return;
     }
 
-
     this.mascot.update(this.fps);
     if (this.mascot.isBeingGrabbed()) {
       if (this.grabbedMascot !== undefined &&
@@ -286,11 +285,59 @@ class MascotManager {
 }
 
 class MascotAction {
-  // listening(){
-  // }
-  // reply(){
-  // }
-  communicate(){
+  constructor(){
+    this.mascot = null;
+    this.canvas = document.createElement("canvas");
+    this.canvas.id = "textCanvas";
+    this.canvas.style.position = "fixed";
+    this.canvas.style.top = "0px";
+    this.canvas.style.left = "0px";
+    this.canvas.style.zIndex = "2147410000";
+    this.canvas.height = 100;
+    this.canvas.width = 100;
+    this.fontsize = 20;
+  }
+
+  copyMascot(mascot){
+    this.mascot = mascot;
+  }
+
+  drawMessage(lineText){
+    this.canvas = document.getElementById("mascotCanvas");
+    var context = this.canvas.getContext("2d");
+    if (context === null) {
+      throw new ReferenceError("context is null!");
+    }
+
+    var padding = 3;
+    var limitedWidth = this.canvas.width - this.mascot.mascot_width - (padding * 2);
+
+    var newLineTextList = [];
+
+    if(context.measureText(lineText).width > limitedWidth) {
+      var charList = lineText.split("");
+      var preLineText = "";
+      var lineText = "";
+      charList.forEach((char) => {
+        lineText += char;
+        if (context.measureText(lineText).width > limitedWidth) {
+          newLineTextList.push(preLineText);
+          lineText = char;
+        }
+        preLineText = lineText;
+      });
+    }
+    newLineTextList.push(lineText);
+
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.font = this.fontsize + "px serif";
+    context.fillStyle = "black";
+    newLineTextList.forEach((lineText, index) => {
+      context.fillText(lineText, this.mascot.mascot_width + padding, padding + (this.fontsize * (index + 1)));
+    });
+  }
+
+  listening(){
     var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
     var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
     var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
@@ -305,10 +352,10 @@ class MascotAction {
     recognition.maxAlternatives = 1;
 
     recognition.start();
-
-    var canvas = document.getElementById("mascotDivElement");
+    this.drawMessage("どうしたの？");
 
     recognition.onresult = (event) => {
+      this.drawMessage(event.results[0][0].transcript);
       console.log(event.results[0][0].transcript);
     }
   }
@@ -329,6 +376,7 @@ function main(chrome) {
             manager.start();
           })
 
+          mascotAction.copyMascot(manager.mascot);
         }
 
         break;
@@ -342,8 +390,10 @@ function main(chrome) {
           //manager.clearKitties();
         break;
       case "talk":
-        if (manager != null)
-          mascotAction.communicate();
+        if (manager != null){
+          mascotAction.copyMascot(manager.mascot);
+          mascotAction.listening();
+        }
         break;
     }
     return false;
