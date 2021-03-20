@@ -69,8 +69,8 @@
         
       } 
     }else{
-      document.getElementById("errorPage").style.display = "block";
-      document.getElementById("successPage").style.display = "none";
+      // document.getElementById("errorPage").style.display = "block";
+      // document.getElementById("successPage").style.display = "none";
     }
   });
   

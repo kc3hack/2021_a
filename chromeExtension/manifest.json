@@ -2,11 +2,12 @@
   "name": "mascot extension",
   "version": "0.1",
   "manifest_version": 2,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxPpiDPv6ZbHc+SvzWSZ/aVYGOiQ5TUmsJPF7cRPNuTKK7+dc3gcTCYkF8Z5dpfLrA+3D2J9iA86X1lqWbgutd0o+iQj0P7hlPmNFet8J9H/MEiNMxXeVJiyPc9R6qfsGhl7j4tkjqiQlfS85sSpiq0V69RVQRQxB+pu/n212QSgJUn751KfIBb1OFUritjkSmTNQHfMbLgRCgXyUF3guM3a4NOubijjw+SqVN21AXjW/UZstmEEe1gd/O5boBOTen738c6qaOtaj4Sx9s25b699tSGu/ZWlvTIduZzotwOfCHWj8sqWqUdVEAMffb3Po4uAwS79mPZAdcYSeXGmlfQIDAQAB",
   
   "description": "KC3のハッカソンで作成されたページ上を徘徊するマスコットアプリ",
   
   "permissions" : [
-    "tabs", "http://*/*", "https://*/*", "contextMenus","activeTab", "storage"
+    "tabs", "http://*/*", "https://*/*", "contextMenus","activeTab", "storage", "identity", "identity.email", "https://accounts.google.com/*",  "https://www.googleapis.com/*"
   ],
   
   "icons" : {
@@ -15,13 +16,16 @@
   
   "background" : {
     "persistent": false,
-    "scripts" : ["background.js"]
+    "scripts" : ["background.js",
+    "./jsrsasign-all-min.js"
+    ]
   },
+
   "browser_action" : {
     "default_icon" : "image/icon19.png"
 
     ,"default_title" : "browser action sample"
-    ,"default_popup" : "popup.html"
+    ,"default_popup" : "loginpopup.html"
   },
   "content_scripts": [
     {
@@ -31,6 +35,15 @@
   ],
   "web_accessible_resources": [
     "image/*"
-  ]
-
+  ],
+  "oauth2": {
+    "client_id": "328483009870-16hl1duvpbjsotq3565icbt32cdn2a7g.apps.googleusercontent.com",
+    "scopes": [
+      "profile email",
+      "https://www.googleapis.com/auth/calendar",
+      "https://www.googleapis.com/auth/calendar.readonly"
+    ]
+  },
+  "content_security_policy": "script-src 'self' https://calendar.google.com; object-src 'self'"
+  
 }

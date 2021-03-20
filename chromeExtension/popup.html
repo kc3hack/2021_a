@@ -4,9 +4,23 @@
 <script src="./jquery-1.10.2.min.js"></script>
 <script src="browser-polyfill.min.js" type="application/javascript"></script>
 <script src="./popup.js"></script>
+<!-- <script src="./oauth.html"></script> -->
+<!-- <script src="https://apis.google.com/js/client.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script> -->
+<!-- <script src="./credentials.json"></script> -->
 <link href="./popup.css" rel="stylesheet" type="text/css">
+
 </head>
 <body style="min-width:250px">
+
+  <p>Google Calendar API Quickstart</p>
+  
+  <!--Add buttons to initiate auth sequence and sign out-->
+  <div class="container" id="AuthorizationPage">
+    <div class="content button" id="authorize">Authorize</div>
+  </div>
+  
+
 
 <div class="wrapper">
   <!-- header -->
@@ -26,6 +40,7 @@
           <div class="content button" id="add">Add mascot to tab</div>
           <div class="content button" id="remove">Remove mascot from tab</div>
           <div class="content button" id="clear">Clear mascot in this tab</div>
+          <div class="content button" id="SignOut">Sign Out</div>
       </div>
       <div class="container" id="errorPage">
         <div class="content">
