@@ -34,6 +34,7 @@ class Mascot {
     this.canvas = document.createElement("canvas");
     this.canvas.id = 'mascotCanvas';
     this.canvas.style.position = "fixed";
+    this.canvas.width = 500;
     this.canvas.style.top = "0px";
     this.canvas.style.left = "0px";
     this.canvas.style.zIndex = "2147400000";
@@ -125,7 +126,7 @@ class Mascot {
     if (context === null) {
       throw new ReferenceError("context is null!");
     }
-    // context.clearRect(0, 0, 32, 32); //おそらく機能に関係しない
+
     context.drawImage(this.image, 0, 0, this.mascot_width, this.mascot_height, 0, 0, this.mascot_width, this.mascot_height);
     //this.mascot_img.setAttribute("style", "position:absolute; left:" + this.x + "px; top:" + this.y + "px;");
   }
@@ -287,21 +288,14 @@ class MascotManager {
 class MascotAction {
   constructor(){
     this.mascot = null;
-    this.canvas = document.createElement("canvas");
-    this.canvas.id = "textCanvas";
-    this.canvas.style.position = "fixed";
-    this.canvas.style.top = "0px";
-    this.canvas.style.left = "0px";
-    this.canvas.style.zIndex = "2147410000";
-    this.canvas.height = 100;
-    this.canvas.width = 100;
-    this.fontsize = 20;
+    this.fontsize = 18;
   }
 
   copyMascot(mascot){
     this.mascot = mascot;
   }
 
+  //吹き出しと文章描画
   drawMessage(lineText){
     this.canvas = document.getElementById("mascotCanvas");
     var context = this.canvas.getContext("2d");
@@ -309,11 +303,13 @@ class MascotAction {
       throw new ReferenceError("context is null!");
     }
 
-    var padding = 3;
-    var limitedWidth = this.canvas.width - this.mascot.mascot_width - (padding * 2);
+    var border = 1;
+    var padding = 5;
+    var limitedWidth = this.canvas.width - this.mascot.mascot_width - ((border + padding)* 2);
 
     var newLineTextList = [];
 
+    //文章を改行したものに変換
     if(context.measureText(lineText).width > limitedWidth) {
       var charList = lineText.split("");
       var preLineText = "";
@@ -329,11 +325,23 @@ class MascotAction {
     }
     newLineTextList.push(lineText);
 
+    //キャンバスをクリア
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    var boxWidth = border * 2 + padding * 2 + this.fontsize * newLineTextList[0].length;
+    var boxHeight = border * 2 + padding * 2 + this.fontsize * newLineTextList.length;
+
+    //テキストボックス描画部分
+    context.fillStyle = "black";
+    context.fillRect(this.mascot.mascot_width, 0, boxWidth, boxHeight);
+    context.fillStyle = "white";
+    context.fillRect(this.mascot.mascot_width + border, border, boxWidth - border * 2, boxHeight - border * 2);
+
+    //テキスト出力
     context.font = this.fontsize + "px serif";
     context.fillStyle = "black";
     newLineTextList.forEach((lineText, index) => {
-      context.fillText(lineText, this.mascot.mascot_width + padding, padding + (this.fontsize * (index + 1)));
+      context.fillText(lineText, this.mascot.mascot_width + border + padding, border + (this.fontsize * (index + 1)));
     });
   }
 
@@ -355,8 +363,9 @@ class MascotAction {
     this.drawMessage("どうしたの？");
 
     recognition.onresult = (event) => {
+      //event.results[0][0].transcript：音声入力された文章
+      //出力したい文章を引数に入れてください
       this.drawMessage(event.results[0][0].transcript);
-      console.log(event.results[0][0].transcript);
     }
   }
 }
