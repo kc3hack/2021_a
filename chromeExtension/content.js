@@ -345,6 +345,15 @@ class MascotAction {
     });
   }
 
+  clearText(){
+    this.canvas = document.getElementById("mascotCanvas");
+    var context = this.canvas.getContext("2d");
+    if (context === null) {
+      throw new ReferenceError("context is null!");
+    }
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
   listening(){
     var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
     var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
@@ -396,7 +405,7 @@ function main(chrome) {
         break;
       case "clear":
         if (manager != null)
-          //manager.clearKitties();
+          mascotAction.clearText();
         break;
       case "talk":
         if (manager != null){
