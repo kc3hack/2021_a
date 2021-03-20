@@ -6,6 +6,7 @@
  * @return {string} 天気：Thunderstorm, Drizzle, Rain, Snow, Atmosphere, Clear, Clouds
  */
 async function getWeatherByCityName(hours,cityName) {
+
     const API_KEY = 'aac4c76332d0c2b3c263a2c729a36505';
     if (hours === 0) {
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${
@@ -32,42 +33,20 @@ const getWeather = async (hours, cityName) => {
     return await getWeatherByCityName(hours, cityName);
 }
 
+
 // 形態素解析に用いるオブジェクトを生成
 const builder = kuromoji
   .builder({ dicPath: "./node_modules/kuromoji/dict" })
-
-/**
- * 人間の言葉を犬語に変換します
- * @param {string} sentence - 変換したい日本語の文章
- * @returns {string} 犬語を返却
- */
-async function ja2dogLang(sentence) {
-    return new Promise((resolve, reject) =>
-        builder.build(function (err, tokenizer) {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            const tokens = tokenizer.tokenize(sentence);
-            //console.dir(tokens); // 形態素解析結果を表示
-            
-            const tokensTrans = tokens.map((token) => {
-                // ##--- transform rule ---##
-                if (token.pos_detail_1 === "句点") return `わん${token.surface_form}`;
-                return token.surface_form;
-            });
-            resolve(tokensTrans.join(""));
-        })
-    );
-}
 
 // 天気として反応する単語リスト
 const weathers = { weather:'天気',
                    Clear:'晴れ',
                    Clouds:'曇り',
                    Rain: '雨',
-                   Snow:'雪'
+                   Snow:'雪',
+                   Thunderstorm: '雷雨',
+                   Drizzle: '霧雨',
+                   Atmosphere: '大気'
                  };
 
 // 都市名として反応する単語リスト
@@ -83,18 +62,31 @@ const regions = { Hokkaido:'北海道',
  * @param {string} sentence - 質問文
  * @return {string} 回答
  */
-function isWeahterQuestion(sentence) {
-    let answer;
+async function questionAnswering(sentence) {
     // 天気について聞かれているかどうか
-    isWeahterQuestion(sentence).then(result =>{
-        weatherQuestionAnswering(sentence);
-    })
-    // answer = await weatherQuestionAnswering(sentence);
-
+    if (await isWeahterQuestion(sentence)) {
+        return await weatherQuestionAnswering(sentence);
+    } else {
+        // どの条件にも当てはまらなかった場合の返答
+        return await nothingQuestionAnswering(sentence);
+    }
 }
 
-isWeahterQuestion('今日の東京の天気は雨ですか');
-weatherQuestionAnswering('今日の東京の天気は雨ですか');
+
+/**
+ * どの条件にも当てはまらなかった場合の返答
+ * @param {string} sentence 質問文
+ * @return {string} 回答
+ */
+async function nothingQuestionAnswering(sentence) {
+    let answer;
+    return new Promise((resolve, reject) => {
+        answer = 'すみませんわん。よくわかりませんでしたわん。';
+        console.log( `返答：${answer}`)
+        resolve(answer)
+    });
+}
+
 
 /**
  * 天気について聞いているかどうかを判定
@@ -136,8 +128,6 @@ async function isWeahterQuestion(sentence) {
     );
 }
 
-//isWeahterQuestion('今日東京で雨が降りますか');
-//weatherQuestionAnswering('今日東京で雨が降りますか');
 
 /**
  * 天気予報の結果の返信を行う
@@ -198,8 +188,8 @@ async function weatherQuestionAnswering(sentence){
 
             resolve(answer);
         })
-        //console.log(answer);
     );
 }
-// questionAnswering(sentense);として使う
 
+
+questionAnswering('あさっての東京の');
