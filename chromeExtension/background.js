@@ -2,9 +2,10 @@ let user_signed_in = false;
 var manifest = chrome.runtime.getManifest();
 var CLIENT_ID = encodeURIComponent('328483009870-16hl1duvpbjsotq3565icbt32cdn2a7g.apps.googleusercontent.com');
 // var RESPONSE_TYPE = encodeURIComponent('id_token');
-var REDIRECT_URI = encodeURIComponent('https://gnddapelcpfmifdcnpndfmcjdjcaadhg.chromiumapp.org');
+var REDIRECT_URI = encodeURIComponent('https://gklecpebbokjkepdenikipglhfeefcmo.chromiumapp.org');
 var STATE = encodeURIComponent('jfkls3n');
-var SCOPE = encodeURIComponent('openid');
+// var SCOPE = encodeURIComponent('openid');
+var SCOPE = encodeURIComponent(manifest.oauth2.scopes.join(' '));
 var PROMPT = encodeURIComponent('consent');
 
 function create_oauth2_url() {
@@ -36,8 +37,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         interactive: true
       }, function (redirect_url) {
           console.log(redirect_url);
+
           
-          sendResponse("success");
+          sendResponse('success');
       });
 
       return true;
