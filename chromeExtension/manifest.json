@@ -40,11 +40,11 @@
     "client_id": "328483009870-16hl1duvpbjsotq3565icbt32cdn2a7g.apps.googleusercontent.com",
     "scopes": [
       // "profile email",
-      // "https://www.googleapis.com/auth/calendar",
+      "https://www.googleapis.com/auth/calendar",
       // "https://www.googleapis.com/auth/calendar.readonly",
       "openid", "email", "profile"
     ]
   },
-  "content_security_policy": "script-src 'self' https://calendar.google.com; object-src 'self'"
+  "content_security_policy": "script-src 'self' https://calendar.google.com https://apis.google.com; object-src 'self'"
   
 }

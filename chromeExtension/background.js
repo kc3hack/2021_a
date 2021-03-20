@@ -12,7 +12,7 @@ function create_oauth2_url() {
   let nonce = encodeURIComponent(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
 
   let url = 'https://accounts.google.com/o/oauth2/v2/auth' +
-    '?client_id=' + CLIENT_ID + '&response_type=id_token' + '&redirect_uri=' + REDIRECT_URI + '&state=' + STATE + '&scope=' + SCOPE + '&prompt=' + PROMPT + '&nonce=' + nonce;
+    '?client_id=' + CLIENT_ID + '&response_type=id_token token' + '&redirect_uri=' + REDIRECT_URI + '&state=' + STATE + '&scope=' + SCOPE + '&prompt=' + PROMPT + '&nonce=' + nonce;
   
   
   console.log(url);
@@ -20,7 +20,7 @@ function create_oauth2_url() {
   return url;
 }
 
-
+ 
 
 
 function is_user_signed_in() {
