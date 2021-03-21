@@ -1,10 +1,8 @@
 let user_signed_in = false;
 var manifest = chrome.runtime.getManifest();
 var CLIENT_ID = encodeURIComponent('328483009870-16hl1duvpbjsotq3565icbt32cdn2a7g.apps.googleusercontent.com');
-// var RESPONSE_TYPE = encodeURIComponent('id_token');
 var REDIRECT_URI = encodeURIComponent('https://gklecpebbokjkepdenikipglhfeefcmo.chromiumapp.org');
 var STATE = encodeURIComponent('jfkls3n');
-// var SCOPE = encodeURIComponent('openid');
 var SCOPE = encodeURIComponent(manifest.oauth2.scopes.join(' '));
 var PROMPT = encodeURIComponent('consent');
 
@@ -44,6 +42,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           
         if ((user_info.iss === 'https://accounts.google.com' || user_signed_in.iss === 'accounts.google.com') && user_info.aud === CLIENT_ID) {
           chrome.browserAction.setPopup({ popup: './popup.html' }, function () {
+            window.tempEmail = user_info.email;
             user_signed_in = true;
             sendResponse('success');
           });

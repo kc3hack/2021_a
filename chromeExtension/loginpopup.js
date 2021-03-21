@@ -4,8 +4,3 @@ document.querySelector('#sign-in').addEventListener('click', function () {
     });
 });
 
-document.querySelector('button').addEventListener('click', function () {
-    chrome.runtime.sendMessage({ message: 'isUserSignedIn' }, function (response) {
-        alert(response);
-    });
-});
