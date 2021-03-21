@@ -30,7 +30,7 @@
   "content_scripts": [
     {
       "matches" : ["http://*/*", "https://*/*"],
-      "js" : ["gif.min.js","gif.js","jquery-1.10.2.min.js", "content.js"]
+      "js" : ["gif.min.js","gif.js","jquery-1.10.2.min.js","content.js"]
     }
   ],
   "web_accessible_resources": [
