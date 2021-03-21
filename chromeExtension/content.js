@@ -1,3 +1,4 @@
+//import Konva from "./konva.min.js"
 class MascotStates {
   constructor() {
     this.Falling = 0;
@@ -17,12 +18,25 @@ class DIRECTION {
   }
 }
 class Animation {
-  constricor(){
-    this.walk=[];
-    this.walk.push();
+  constructor() {
+    this.walk=new Anim("image/walk.gif");
+    this.fall=new Anim("image/fall1.gif");
+    this.eat=new Anim("image/eat.gif");
+    this.land=new Anim("image/fall2.gif");
+    this.chat=new Anim("image/chat.gif");
   }
-
+  getAll(){
+    return [this.walk,this.fall,this.eat,this.land,this.chat];
+  }
+  
 }
+class Anim{
+  constructor(src) {
+    this.src=src;
+    this.frames=[];
+}
+  }
+var animation=new Animation();
 var Direction = new DIRECTION();
 var MASCOT_STATES = new MascotStates();
 class Mascot {
@@ -42,10 +56,11 @@ class Mascot {
     this.canvas.id = 'mascotCanvas';
     this.canvas.style.position = "fixed";
     this.canvas.width = 500;
+    this.canvas.height = 500;
     this.canvas.style.top = "0px";
     this.canvas.style.left = "0px";
     this.canvas.style.zIndex = "2147400000";
-    var _this=this;
+    var _this = this;
     this.canvas.addEventListener("mousedown", function (event) {
       _this.mouseXOffset = _this.x - event.clientX;
       _this.mouseYOffset = _this.y - event.clientY;
@@ -58,7 +73,81 @@ class Mascot {
     this.canvas = document.getElementById("mascotCanvas");
     this.image = new Image();
     this.image.src = imgsrc;
+    this.gif = new Gif();
+    var gif = this.gif;
+
+    this.frames = animation.fall.frames;
+    
+    this.idx = 0;
+
+    //var initGif=this.initGif;
+    return new Promise(function (resolve, reject) {
+      try {
+        
+          _this.createGifFrames(_this,gif,animation.walk.frames,animation.walk.src)
+          .then(msct=>_this.createGifFrames(_this,gif,animation.land.frames,animation.land.src))
+          .then(msct=>_this.createGifFrames(_this,gif,animation.eat.frames,animation.eat.src))
+          .then(msct=>_this.createGifFrames(_this,gif,animation.chat.frames,animation.chat.src))
+          .then(msct=>{
+            _this.createGifFrames(_this,gif,animation.fall.frames,animation.fall.src);
+            resolve(msct);})
+            
+      } catch (error) {
+        reject(error);
+      }
+    });
+    
+      
+    
   }
+  createGifFrames(__this,_gif,_frames,imgsrc){
+    var _this=__this;
+    var gif=_gif;
+    var frames=_frames;
+    return new Promise(function (resolve, reject) {
+      try {
+        var img=new Image();
+        img.src=chrome.extension.getURL(imgsrc);
+        fetch(chrome.extension.getURL(imgsrc)).then(res => res.blob()).then(blob => blob.arrayBuffer()).then(buffer => {
+      
+          gif.parse(buffer,
+            function () { // on parse
+              _this.initGif(_this.canvas,gif,frames);
+              
+              resolve(_this);
+            },
+            function (e) { // on error
+              alert(e);
+            },
+            function (e) { // on progress
+              console.log('Parsing...' + ((100 * e.loaded / e.total) | 0) + '%');
+            });
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  initGif(_canvas,_gif,_frames){
+    var canvas = _canvas;
+    var gif=_gif;
+    var frames=_frames;
+    return new Promise(function (resolve, reject) {
+      try {
+        var context = canvas.getContext('2d');
+        var frames2 = gif.createFrameImages(context, true,true);
+        for (var i = 0; i < frames2.length; i++) {
+          frames.push(frames2[i]);
+        }
+        console.log("num frames:"+frames.length);
+        // pre-rendering
+        resolve(frames);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
   update(fps) {
     this.animTimer += 10 / fps;
     this.updateState(fps);
@@ -66,7 +155,8 @@ class Mascot {
     this.checkBounds();
     this.draw();
   }
-  isBeingGrabbed(){
+  isBeingGrabbed() {
+    this.frames=animation.fall.frames;
     return this.state === MASCOT_STATES.Grabbed;
   }
   updateState(fps) {
@@ -104,6 +194,7 @@ class Mascot {
     return this.animTimer > this.animMax;
   }
   updateFalling(fps) {
+    this.frames=animation.fall.frames;
     if (this.y < window.innerHeight - this.mascot_height) {
       this.yVector = this.yVector + 2 * (1 / fps);
     }
@@ -116,25 +207,52 @@ class Mascot {
     }
   }
   updateRunning() {
+    this.frames=animation.walk.frames;
     this.checkAndChageStates(this.randomState());
     this.xVector = this.direction == Direction.Right ? 2 : -2;
   }
   updateStanding() {
+    this.frames=animation.eat.frames;
     this.checkAndChageStates(this.randomState());
   }
   updateWalking() {
+    this.frames=animation.walk.frames;
     this.checkAndChageStates(this.randomState());
     this.xVector = this.direction == Direction.Right ? 1 : -1;
   }
+  onDrawFrame(ctx, frame) {
+    this.canvas.style.top = "" + this.y + "px";
+    this.canvas.style.left = "" + this.x + "px";
+    // update canvas size
+    //canvas.width = frame.width;
+    //canvas.height = frame.height;
+    // update canvas that we are using for Konva.Image
+    ctx.drawImage(frame.buffer, 0, 0, this.mascot_width, this.mascot_height, 0, 0, this.mascot_width, this.mascot_height);
+    // redraw the layer
+    this.layer.draw();
+  }
   draw() {
+    //debugger;
+    var adjustSpeed=6;
     this.canvas.style.top = "" + this.y + "px";
     this.canvas.style.left = "" + this.x + "px";
     var context = this.canvas.getContext("2d");
     if (context === null) {
       throw new ReferenceError("context is null!");
     }
-
-    context.drawImage(this.image, 0, 0, this.mascot_width, this.mascot_height, 0, 0, this.mascot_width, this.mascot_height);
+    if(isNaN(this.idx)){
+      this.idx = 0;
+    }if(typeof this.frames[Math.floor(this.idx/adjustSpeed)]==="undefined"){
+      this.idx=0;
+      return;
+    }
+    
+    context.clearRect(0,0,this.canvas.width,this.canvas.height);
+    context.drawImage(this.frames[Math.floor(this.idx/adjustSpeed) ].image, 0, 0, this.mascot_width, this.mascot_height, 0, 0, this.mascot_width, this.mascot_height);
+    this.idx = (this.idx ) % (this.frames.length*adjustSpeed)+ 1;
+    if(this.idx==this.frames.length*adjustSpeed){
+      this.idx = 0;
+    }
     //this.mascot_img.setAttribute("style", "position:absolute; left:" + this.x + "px; top:" + this.y + "px;");
   }
   randomState() {
@@ -202,6 +320,7 @@ class MascotManager {
     document.addEventListener("mousemove", this.updateGrabbedMascot.bind(this));
     document.addEventListener("blur", this.releaseGrabbedMascot.bind(this));
     document.addEventListener("mouseup", this.releaseGrabbedMascot.bind(this));
+    window.addEventListener('blur', this.releaseGrabbedMascot.bind(this));
   }
   addMascot() {
     var func1 = this.setImage;
@@ -227,7 +346,7 @@ class MascotManager {
         var topBody = document.body;
         var img_area = document.createElement("div");
         img_area.id = "mascotDivElement";
-        var imgsrc = chrome.extension.getURL('image/asi-removebg-preview.png');
+        var imgsrc = chrome.extension.getURL('image/walk.gif');
         var img_element = img_area.appendChild(document.createElement("img"));
         img_element.src = imgsrc;
         img_element.alt = "mascot";
@@ -293,17 +412,17 @@ class MascotManager {
 }
 
 class MascotAction {
-  constructor(){
+  constructor() {
     this.mascot = null;
     this.fontsize = 18;
   }
 
-  copyMascot(mascot){
+  copyMascot(mascot) {
     this.mascot = mascot;
   }
 
   //吹き出しと文章描画
-  drawMessage(lineText){
+  drawMessage(lineText) {
     this.canvas = document.getElementById("mascotCanvas");
     var context = this.canvas.getContext("2d");
     if (context === null) {
@@ -312,12 +431,12 @@ class MascotAction {
 
     var border = 1;
     var padding = 5;
-    var limitedWidth = this.canvas.width - this.mascot.mascot_width - ((border + padding)* 2);
+    var limitedWidth = this.canvas.width - this.mascot.mascot_width - ((border + padding) * 2);
 
     var newLineTextList = [];
 
     //文章を改行したものに変換
-    if(context.measureText(lineText).width > limitedWidth) {
+    if (context.measureText(lineText).width > limitedWidth) {
       var charList = lineText.split("");
       var preLineText = "";
       var lineText = "";
@@ -352,7 +471,7 @@ class MascotAction {
     });
   }
 
-  clearText(){
+  clearText() {
     this.canvas = document.getElementById("mascotCanvas");
     var context = this.canvas.getContext("2d");
     if (context === null) {
@@ -361,7 +480,7 @@ class MascotAction {
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  listening(){
+  listening() {
     var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
     var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
     var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
@@ -415,7 +534,7 @@ function main(chrome) {
           mascotAction.clearText();
         break;
       case "talk":
-        if (manager != null){
+        if (manager != null) {
           mascotAction.copyMascot(manager.mascot);
           mascotAction.listening();
         }
