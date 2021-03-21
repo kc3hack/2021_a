@@ -6,6 +6,7 @@ class MascotStates {
     this.Running = 2;
     this.Walking = 3;
     this.Standing = 4;
+    this.chatting=5;
   }
   getMaxNum() {
     return 4;
@@ -177,6 +178,9 @@ class Mascot {
       case MASCOT_STATES.Walking:
         this.updateWalking();
         break;
+      case MASCOT_STATES.chatting:
+        this.frames=animation.chat.frames;
+        break;
     }
   }
   randomDir() {
@@ -256,7 +260,11 @@ class Mascot {
     //this.mascot_img.setAttribute("style", "position:absolute; left:" + this.x + "px; top:" + this.y + "px;");
   }
   randomState() {
-    return Math.floor(Math.random() * MASCOT_STATES.getMaxNum());
+    var i=Math.floor(Math.random() * MASCOT_STATES.getMaxNum());
+    if (i==MASCOT_STATES.Falling){
+      i=MASCOT_STATES.Standing;
+    }
+    return i;
   }
   move(fps) {
     if (this.state == MASCOT_STATES.Grabbed ||
@@ -307,6 +315,13 @@ class Mascot {
   dispose() {
     var childDiv = document.getElementById("mascotDivElement");
     document.body.removeChild(childDiv);
+  }
+  startChatting(){
+    this.state =MASCOT_STATES.chatting;
+    this.frames=animation.chat.frames;
+  }
+  endChatting(){
+    this.checkAndChageStates(this.randomState());
   }
 }
 
@@ -469,6 +484,7 @@ class MascotAction {
     newLineTextList.forEach((lineText, index) => {
       context.fillText(lineText, this.mascot.mascot_width + border + padding, border + (this.fontsize * (index + 1)));
     });
+    this.mascot.startChatting();
   }
 
   clearText() {
@@ -478,6 +494,7 @@ class MascotAction {
       throw new ReferenceError("context is null!");
     }
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.mascot.endChatting();
   }
 
   listening() {
@@ -518,9 +535,10 @@ function main(chrome) {
           manager.addMascot().then(mascot => {
             manager.setMascot(mascot);
             manager.start();
+            mascotAction.copyMascot(mascot);
           })
 
-          mascotAction.copyMascot(manager.mascot);
+          
         }
 
         break;
