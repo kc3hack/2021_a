@@ -467,7 +467,7 @@ class MascotAction {
     newLineTextList.push(lineText);
 
     //キャンバスをクリア
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    context.clearRect(0, 0, this.mascot_width, this.mascot_height);
 
     var boxWidth = border * 2 + padding * 2 + this.fontsize * newLineTextList[0].length;
     var boxHeight = border * 2 + padding * 2 + this.fontsize * newLineTextList.length;
