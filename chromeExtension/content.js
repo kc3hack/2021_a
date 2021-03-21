@@ -55,7 +55,7 @@ class Mascot {
     this.canvas = document.createElement("canvas");
     this.canvas.id = 'mascotCanvas';
     this.canvas.style.position = "fixed";
-    this.canvas.width = 500;
+    this.canvas.width = 700;
     this.canvas.height = 500;
     this.canvas.style.top = "0px";
     this.canvas.style.left = "0px";
@@ -247,7 +247,7 @@ class Mascot {
       return;
     }
     
-    context.clearRect(0,0,this.canvas.width,this.canvas.height);
+    context.clearRect(0,0,this.mascot_width,this.mascot_height);
     context.drawImage(this.frames[Math.floor(this.idx/adjustSpeed) ].image, 0, 0, this.mascot_width, this.mascot_height, 0, 0, this.mascot_width, this.mascot_height);
     this.idx = (this.idx ) % (this.frames.length*adjustSpeed)+ 1;
     if(this.idx==this.frames.length*adjustSpeed){
@@ -469,6 +469,8 @@ class MascotAction {
     newLineTextList.forEach((lineText, index) => {
       context.fillText(lineText, this.mascot.mascot_width + border + padding, border + (this.fontsize * (index + 1)));
     });
+    console.log(this.canvas.width);
+    console.log(this.mascot.mascot_width);
   }
 
   clearText() {
